@@ -6,7 +6,6 @@ import { Subscription } from 'rxjs/Subscription';
 import 'rxjs/add/observable/timer';
 import 'rxjs/add/operator/concatMap';
 import 'rxjs/add/operator/expand';
-import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/skipWhile';
 
 @Component({
@@ -15,34 +14,36 @@ import 'rxjs/add/operator/skipWhile';
   styleUrls: ['./dashboard.component.less']
 })
 export class DashboardComponent implements OnDestroy {
-  public bitCoinSpotPrices: Array<SpotPrice>;
-  public etheriumSpotPrices: Array<SpotPrice>;
-  public timeStamp: Date;
+  public bitCoinSpotPrices: Array<SpotPriceWithTimeStamp>;
+  public etheriumSpotPrices: Array<SpotPriceWithTimeStamp>;
   private bitCoinStreamOpen: boolean;
   private etheriumStreamOpen: boolean;
   private bitCoinSpotPriceSubscription: Subscription;
   private etheriumSpotPriceSubscription: Subscription;
 
   constructor(private coinbaseService: CoinbaseService) {
-    this.timeStamp = new Date(Date.now());
-    this.bitCoinSpotPrices = new Array<SpotPrice>();
-    this.etheriumSpotPrices = new Array<SpotPrice>();
+    this.bitCoinSpotPrices = new Array<SpotPriceWithTimeStamp>();
+    this.etheriumSpotPrices = new Array<SpotPriceWithTimeStamp>();
     this.bitCoinStreamOpen = true;
     this.etheriumStreamOpen = false;
 
     this.bitCoinSpotPriceSubscription = this.getBitcoinSpotPrice()
-    .distinctUntilChanged()
     .expand(() => Observable.timer(30000)
     .concatMap(() => this.getBitcoinSpotPrice()))
     .skipWhile(() => this.etheriumStreamOpen === true)
-    .subscribe((spotPrice: SpotPriceQueryReturn) => { this.bitCoinSpotPrices.push(spotPrice.data); return spotPrice.data; });
+    .subscribe((spotPrice: SpotPriceQueryReturn) => {
+      const bitCoinSpotPrice: SpotPriceWithTimeStamp = this.addTimeStamp(spotPrice.data);
+      this.bitCoinSpotPrices.push(bitCoinSpotPrice);
+    });
 
     this.etheriumSpotPriceSubscription = this.getEtheriumSpotPrice()
-    .distinctUntilChanged()
     .expand(() => Observable.timer(30000)
     .concatMap(() => this.getEtheriumSpotPrice()))
     .skipWhile(() => this.bitCoinStreamOpen === true)
-    .subscribe((spotPrice: SpotPriceQueryReturn) => { this.etheriumSpotPrices.push(spotPrice.data); return spotPrice.data; });
+    .subscribe((spotPrice: SpotPriceQueryReturn) => {
+      const etheriumSpotPrice: SpotPriceWithTimeStamp = this.addTimeStamp(spotPrice.data);
+      this.etheriumSpotPrices.push(etheriumSpotPrice);
+    });
   }
 
   ngOnDestroy() {
@@ -55,6 +56,11 @@ export class DashboardComponent implements OnDestroy {
    this.etheriumStreamOpen = !this.bitCoinStreamOpen;
   }
 
+  private addTimeStamp(spotPriceData: SpotPrice): SpotPriceWithTimeStamp {
+    (spotPriceData as SpotPriceWithTimeStamp).timeStamp = new Date(Date.now());
+    return <SpotPriceWithTimeStamp>spotPriceData;
+  }
+
   private getBitcoinSpotPrice(): Observable<SpotPriceQueryReturn> {
     return this.coinbaseService.getBitcoinSpotPrice();
   }
@@ -62,4 +68,8 @@ export class DashboardComponent implements OnDestroy {
   private getEtheriumSpotPrice(): Observable<SpotPriceQueryReturn> {
     return this.coinbaseService.getEtheriumSpotPrice();
   }
+}
+
+interface SpotPriceWithTimeStamp extends SpotPrice {
+  timeStamp: Date;
 }

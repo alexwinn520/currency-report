@@ -2,14 +2,14 @@
 <button (click)="swapCurrencyStream(bitCoinSpotPrices)">BitCoin</button>
 <div *ngIf="bitCoinStreamOpen">
   <div *ngFor="let bitCoinPrice of bitCoinSpotPrices">
-    <p>Time: {{timeStamp | date:'medium'}}</p>
+    <p>Time: {{bitCoinPrice?.timeStamp | date:'medium'}}</p>
     <p>BitCoin Price: {{bitCoinPrice?.currency}} ${{bitCoinPrice?.amount}}</p>
   </div>
 </div>
 
 <div *ngIf="etheriumStreamOpen">
   <div *ngFor="let etheriumPrice of etheriumSpotPrices">
-    <p>Time: {{timeStamp | date:'medium'}}</p>
+    <p>Time: {{etheriumPrice?.timeStamp | date:'medium'}}</p>
     <p>Etherium Price: {{etheriumPrice?.currency}} ${{etheriumPrice?.amount}}</p>
   </div>
 </div>
