@@ -8,6 +8,7 @@ import { HomeComponent } from './home/home.component';
 
 import { CoinbaseService } from './services/coinbase.service';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { LineChartComponent } from './line-chart/line-chart.component';
 
 const AppRoutes: Routes = [
   {
@@ -24,7 +25,8 @@ const AppRoutes: Routes = [
   declarations: [
     AppComponent,
     HomeComponent,
-    DashboardComponent
+    DashboardComponent,
+    LineChartComponent
   ],
   imports: [
     BrowserModule,
