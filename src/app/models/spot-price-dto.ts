@@ -5,5 +5,9 @@ export interface SpotPriceQueryReturn {
 export interface SpotPrice {
   base: string;
   currency: string;
-  amount: number;
+  amount: string;
+}
+
+export interface SpotPriceWithTimeStamp extends SpotPrice {
+  timeStamp: Date;
 }

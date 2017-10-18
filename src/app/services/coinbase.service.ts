@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 import { SpotPriceQueryReturn } from '../models/spot-price-dto';
-import 'rxjs/add/observable/of';
-import 'rxjs/add/operator/mergeMap';
+import 'rxjs/add/operator/map';
 
 @Injectable()
 export class CoinbaseService {
@@ -12,11 +11,11 @@ export class CoinbaseService {
 
   public getBitcoinSpotPrice(): Observable<SpotPriceQueryReturn> {
     return this.http.get('https://api.coinbase.com/v2/prices/BTC-USD/spot')
-    .flatMap((response: SpotPriceQueryReturn) => { return Observable.of(response); });
+    .map((response: SpotPriceQueryReturn) => response);
   }
 
   public getEtheriumSpotPrice(): Observable<SpotPriceQueryReturn> {
     return this.http.get('https://api.coinbase.com/v2/prices/ETH-USD/spot')
-    .flatMap((response: SpotPriceQueryReturn) => { return Observable.of(response); });
+    .map((response: SpotPriceQueryReturn) => response);
   }
 }
