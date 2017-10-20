@@ -1,5 +1,4 @@
 import { Component, AfterViewInit, Input, ViewChild, ElementRef } from '@angular/core';
-import { CurrencyDataPoint } from '../models/chart-data';
 import { SpotPriceWithTimeStamp } from '../models/spot-price-dto';
 import * as d3 from 'd3-selection';
 import * as d3Scale from 'd3-scale';
@@ -14,7 +13,6 @@ import * as d3Time from 'd3-time-format';
    template: `<div class="chart-container">
               <section #container class="svg-container"></section>
              </div>`
-  // template: `<svg width="900" height="500"></svg>`
 })
 export class LineChartComponent implements AfterViewInit {
   @ViewChild('container') viewContainer: ElementRef;
@@ -26,9 +24,8 @@ export class LineChartComponent implements AfterViewInit {
   private height: number;
   private x: d3Scale.ScaleTime<number, number>;
   private y: d3Scale.ScaleLinear<number, number>;
-  private line: d3Shape.Line<[number, number]>;
-
-  private margin = {top: 50, right: 20, bottom: 30, left: 50};
+  private line: d3Shape.Line<CurrencyDataPoint>;
+  private margin: Margin = {top: 50, right: 20, bottom: 30, left: 50};
 
   constructor() { }
 
@@ -71,8 +68,8 @@ export class LineChartComponent implements AfterViewInit {
   private initAxis(): void {
     this.x = d3Scale.scaleTime().range([0, this.width]);
     this.y = d3Scale.scaleLinear().range([this.height, 0]);
-    this.x.domain(d3Array.extent(this.chartData, (d: CurrencyDataPoint) => d.timeStamp as any ));
-    this.y.domain(d3Array.extent(this.chartData, (d: CurrencyDataPoint) => d.value ));
+    this.x.domain(<Array<Date>>d3Array.extent(this.chartData, (d: CurrencyDataPoint) => d.timeStamp));
+    this.y.domain(d3Array.extent(this.chartData, (d: CurrencyDataPoint) => d.value));
   }
 
   private drawAxis(): void {
@@ -94,13 +91,25 @@ export class LineChartComponent implements AfterViewInit {
   }
 
   private drawLine(): void {
-    this.line = d3Shape.line()
-      .x((d: any) => { return this.x(d.timeStamp); })
-      .y((d: any) => { return this.y(d.value); });
+    this.line = d3Shape.line<CurrencyDataPoint>()
+      .x((d: CurrencyDataPoint) => { return this.x(d.timeStamp); })
+      .y((d: CurrencyDataPoint) => { return this.y(d.value); });
 
     this.svg.append('path')
       .datum(this.chartData)
       .attr('class', 'line')
-      .attr('d', this.line as any);
+      .attr('d', this.line as d3.ValueFn<d3.BaseType, Array<ThisType<CurrencyDataPoint>>, string | number | boolean>);
   }
+}
+
+interface CurrencyDataPoint {
+  timeStamp: Date;
+  value: number;
+}
+
+interface Margin {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
 }
